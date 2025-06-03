@@ -1,0 +1,43 @@
+template: benning-tsl
+covers: ["benning-tsl"]
+products:
+  - brand: Benning
+    description:
+      generic: TSL Series
+params:
+  - name: usage
+    choice: ["grid", "pv", "battery"]
+    allinone: true
+  - name: host
+  - name: capacity
+    advanced: true
+render: |
+  {{- if eq .usage "grid" }}
+  type: custom
+  power:
+    # Grid
+    source: http
+    uri: http://{{ .host }}/getentry.cgi?&oid=11365 # AcPowerTotal
+    jq: .val
+  {{- end }}
+  {{- if eq .usage "pv" }}
+  type: custom
+  power:
+    # PV
+    source: http
+    uri: http://{{ .host }}/getentry.cgi?&oid=11395 # DcPowerTotal
+    jq: .val
+  {{- end }}
+  {{- if eq .usage "battery" }}
+  type: custom
+  power:
+    # Battery
+    source: http
+    uri: http://{{ .host }}/getentry.cgi?&oid=12025 # BatteryPower
+    jq: .val
+  soc:
+    source: http
+    uri: http://{{ .host }}/getentry.cgi?&oid=12210 # BMS.SoC
+    jq: .val
+  capacity: {{ .capacity }} # kWh
+  {{- end }}
